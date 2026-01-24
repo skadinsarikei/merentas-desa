@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Rekod Merentas Desa SK Adin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f0f0f0;
+            border-bottom: 2px solid #ddd;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: white;
+            color: #1e3c72;
+            border-bottom: 3px solid #1e3c72;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .house-merah { color: #e74c3c; font-weight: bold; }
+        .house-biru { color: #3498db; font-weight: bold; }
+        .house-hijau { color: #27ae60; font-weight: bold; }
+        .house-kuning { color: #f39c12; font-weight: bold; }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+            color: #1e3c72;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .score-table {
+            max-width: 1200px;
+        }
+
+        /* Besarkan font jadual markah keseluruhan */
+        #overallScores td {
+            font-size: 80px;
+            font-weight: bold;
+            padding: 20px 15px;
+        }
+
+        #overallScores th {
+            font-size: 20px;
+        }
+
+        .status-msg {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃‍♂️ SISTEM REKOD MERENTAS DESA SK ADIN 🏃‍♀️</h1>
+            <p>Sistem Pengurusan Keputusan & Markah</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab(0)">MARKAH PENUH</button>
+            <button class="tab" onclick="showTab(1)">TAHAP 1 L</button>
+            <button class="tab" onclick="showTab(2)">TAHAP 1 P</button>
+            <button class="tab" onclick="showTab(3)">TAHAP 2 L</button>
+            <button class="tab" onclick="showTab(4)">TAHAP 2 P</button>
+        </div>
+
+        <!-- Tab 1: Markah Penuh -->
+        <div class="tab-content active">
+            <div id="statusMsg"></div>
+
+            <h2 class="section-title">📊 MARKAH KESELURUHAN RUMAH SUKAN</h2>
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th>RUMAH</th>
+                        <th>MATA</th>
+                    </tr>
+                </thead>
+                <tbody id="overallScores">
+                    <tr><td class="house-merah">MERAH</td><td id="merah-total">0</td></tr>
+                    <tr><td class="house-biru">BIRU</td><td id="biru-total">0</td></tr>
+                    <tr><td class="house-hijau">HIJAU</td><td id="hijau-total">0</td></tr>
+                    <tr><td class="house-kuning">KUNING</td><td id="kuning-total">0</td></tr>
+                </tbody>
+            </table>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="btn btn-primary" onclick="refreshData()">🔄 REFRESH MARKAH</button>
+            </div>
+
+            <h2 class="section-title">🏆 10 TERBAIK - LELAKI TAHAP 1</h2>
+            <table id="top10-tahap1-l"></table>
+
+            <h2 class="section-title">🏆 10 TERBAIK - PEREMPUAN TAHAP 1</h2>
+            <table id="top10-tahap1-p"></table>
+
+            <h2 class="section-title">🏆 10 TERBAIK - LELAKI TAHAP 2</h2>
+            <table id="top10-tahap2-l"></table>
+
+            <h2 class="section-title">🏆 10 TERBAIK - PEREMPUAN TAHAP 2</h2>
+            <table id="top10-tahap2-p"></table>
+        </div>
+
+        <!-- Tab 2-5: Kategori -->
+        <div class="tab-content">
+            <h2 class="section-title">🏃‍♂️ KATEGORI LELAKI TAHAP 1</h2>
+            <button class="btn btn-success" onclick="saveCategory('tahap1-l')">💾 SIMPAN KEMASKINI</button>
+            <div id="statusMsg-tahap1-l"></div>
+            <table id="table-tahap1-l"></table>
+            
+            <h3 class="section-title">📈 ANALISA MARKAH</h3>
+            <table class="score-table" id="analysis-tahap1-l"></table>
+            
+            <div class="note">
+                <strong>Sistem Mata:</strong> Kedudukan 1 = 11 mata, 2 = 10 mata, 3 = 9 mata, ..., 10 = 2 mata, 11 dan seterusnya = 1 mata
+            </div>
+        </div>
+
+        <div class="tab-content">
+            <h2 class="section-title">🏃‍♀️ KATEGORI PEREMPUAN TAHAP 1</h2>
+            <button class="btn btn-success" onclick="saveCategory('tahap1-p')">💾 SIMPAN KEMASKINI</button>
+            <div id="statusMsg-tahap1-p"></div>
+            <table id="table-tahap1-p"></table>
+            
+            <h3 class="section-title">📈 ANALISA MARKAH</h3>
+            <table class="score-table" id="analysis-tahap1-p"></table>
+            
+            <div class="note">
+                <strong>Sistem Mata:</strong> Kedudukan 1 = 11 mata, 2 = 10 mata, 3 = 9 mata, ..., 10 = 2 mata, 11 dan seterusnya = 1 mata
+            </div>
+        </div>
+
+        <div class="tab-content">
+            <h2 class="section-title">🏃‍♂️ KATEGORI LELAKI TAHAP 2</h2>
+            <button class="btn btn-success" onclick="saveCategory('tahap2-l')">💾 SIMPAN KEMASKINI</button>
+            <div id="statusMsg-tahap2-l"></div>
+            <table id="table-tahap2-l"></table>
+            
+            <h3 class="section-title">📈 ANALISA MARKAH</h3>
+            <table class="score-table" id="analysis-tahap2-l"></table>
+            
+            <div class="note">
+                <strong>Sistem Mata:</strong> Kedudukan 1 = 11 mata, 2 = 10 mata, 3 = 9 mata, ..., 10 = 2 mata, 11 dan seterusnya = 1 mata
+            </div>
+        </div>
+
+        <div class="tab-content">
+            <h2 class="section-title">🏃‍♀️ KATEGORI PEREMPUAN TAHAP 2</h2>
+            <button class="btn btn-success" onclick="saveCategory('tahap2-p')">💾 SIMPAN KEMASKINI</button>
+            <div id="statusMsg-tahap2-p"></div>
+            <table id="table-tahap2-p"></table>
+            
+            <h3 class="section-title">📈 ANALISA MARKAH</h3>
+            <table class="score-table" id="analysis-tahap2-p"></table>
+            
+            <div class="note">
+                <strong>Sistem Mata:</strong> Kedudukan 1 = 11 mata, 2 = 10 mata, 3 = 9 mata, ..., 10 = 2 mata, 11 dan seterusnya = 1 mata
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Google Sheets API URL (sudah ditetapkan)
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyk4Hu5o6FjUaPd_d30Qx5kQwf_gSQnNKGruWPgKxzpN-dCoDSeYK_e7zi4rRqwhtnB/exec';
+
+        // Data murid dari fail
+        const studentsData = [
+            {kelas: "1A", nama: "ALEXSTER BANTA ANAK HENRY", jantina: "L", rumah: "M"},
+            {kelas: "1A", nama: "ALFRED  AWIN ANAK TEMARA", jantina: "L", rumah: "H"},
+            {kelas: "1A", nama: "ALYA DARA SHASHA ANAK LAYANG", jantina: "P", rumah: "K"},
+            {kelas: "1A", nama: "AUDREY SEDI ANAK LISLINE MAYAN", jantina: "P", rumah: "H"},
+            {kelas: "1A", nama: "CARLISSA KYLA ANAK WIN", jantina: "P", rumah: "B"},
+            {kelas: "1A", nama: "DANIEL IKOM ANAK STANLEY", jantina: "L", rumah: "K"},
+            {kelas: "1A", nama: "FABRIZIO JUNI ANAK JACKSON PANTING", jantina: "L", rumah: "M"},
+            {kelas: "1A", nama: "HELLY ANAK NIXON RIBONG", jantina: "L", rumah: "H"},
+            {kelas: "1A", nama: "JISTA ANAK DIGELOS IGAT", jantina: "L", rumah: "B"},
+            {kelas: "1A", nama: "NELSON JAMPI ANAK GAMBONG", jantina: "L", rumah: "K"},
+            {kelas: "1A", nama: "RAFAEL INSUL ANAK MARLYN MEK", jantina: "L", rumah: "B"},
+            {kelas: "1A", nama: "RAFAELLA JOVELYN LENDAI  ANAK RAYMOND", jantina: "P", rumah: "M"},
+            {kelas: "1A", nama: "THORESWIN LOO ANAK THOMAS BROLIN", jantina: "L", rumah: "H"},
+            {kelas: "2A", nama: "AGNES REBA ANAK REMONG", jantina: "P", rumah: "H"},
+            {kelas: "2A", nama: "ANNUR ATHIRAH BINTI MOHD SAFUAN", jantina: "P", rumah: "B"},
+            {kelas: "2A", nama: "CHRISTOPER LANDA ANAK BUNYAU", jantina: "L", rumah: "K"},
+            {kelas: "2A", nama: "FERDILIEYCA SENNEY ANAK MICDILTON LAWAI", jantina: "P", rumah: "H"},
+            {kelas: "2A", nama: "IVANNA BIAH ANAK NAONG", jantina: "P", rumah: "K"},
+            {kelas: "2A", nama: "JACQUELINE ENSAYAN LIM", jantina: "P", rumah: "B"},
+            {kelas: "2A", nama: "JIANA ANAK DIGELOS IGAT", jantina: "P", rumah: "K"},
+            {kelas: "2A", nama: "JULIANA AMBAN ANAK JALIN", jantina: "P", rumah: "M"},
+            {kelas: "2A", nama: "KELVIN LEONARDUS ANAK STEVERLY ALLEYRIE", jantina: "L", rumah: "B"},
+            {kelas: "2A", nama: "MELVIN RAPHAEL ANAK FRANCIS ENGKAMAT", jantina: "L", rumah: "M"},
+            {kelas: "2A", nama: "RAFAELEE RANGI ANAK RAYMOND", jantina: "L", rumah: "H"},
+            {kelas: "3A", nama: "ALISCIA GARATU ANAK LABIN", jantina: "P", rumah: "K"},
+            {kelas: "3A", nama: "ANDERSON ANGGO ANAK REMONG", jantina: "L", rumah: "B"},
+            {kelas: "3A", nama: "CARLZ IVANDER UGAK ANAK CLARANCE", jantina: "L", rumah: "H"},
+            {kelas: "3A", nama: "FELLINEENA MAYANG ANAK KUDI", jantina: "P", rumah: "K"},
+            {kelas: "3A", nama: "GABRIEL GERRY ANAK MULING", jantina: "L", rumah: "K"},
+            {kelas: "3A", nama: "HARIS SAMUEL ANAK HENRY GAING", jantina: "L", rumah: "M"},
+            {kelas: "3A", nama: "IGNATIOUS ANAK JOHNNY", jantina: "L", rumah: "K"},
+            {kelas: "3A", nama: "JOANNA MELVINA ANAK JOHNNY", jantina: "P", rumah: "H"},
+            {kelas: "3A", nama: "JULIANA BANGI ANAK EKIE", jantina: "P", rumah: "H"},
+            {kelas: "3A", nama: "MALINA TIMBONG ANAK LIBAU", jantina: "P", rumah: "M"},
+            {kelas: "3A", nama: "MARIA TRACY ANAK TONY JOE", jantina: "P", rumah: "B"},
+            {kelas: "3A", nama: "PETRIUS UJANG ANAK PHILIP ANDING", jantina: "L", rumah: "M"},
+            {kelas: "4A", nama: "CHUA ANAK TEMEKA", jantina: "L", rumah: "B"},
+            {kelas: "4A", nama: "CLAUDIA VANESSA UMING ANAK JACKSON TANDANG", jantina: "P", rumah: "B"},
+            {kelas: "4A", nama: "DAHLIA DURRA ANAK EDWIN MANCHA", jantina: "P", rumah: "M"},
+            {kelas: "4A", nama: "DANNY ACHOI ANAK MIRA", jantina: "L", rumah: "M"},
+            {kelas: "4A", nama: "DERREN IKAU ANAK ERICKSON", jantina: "L", rumah: "H"},
+            {kelas: "4A", nama: "EMMANUEL ANAK ANDY", jantina: "L", rumah: "M"},
+            {kelas: "4A", nama: "EMMANUEL MATTEUS RAGAI ANAK EDWARD LANGGI", jantina: "L", rumah: "H"},
+            {kelas: "4A", nama: "EVAIN ANAK ELEVATOR", jantina: "P", rumah: "K"},
+            {kelas: "4A", nama: "JOEVYNUS SIGAU JACKSON KALANG", jantina: "L", rumah: "B"},
+            {kelas: "4A", nama: "JOYSHYIANNA ANAK MELIKA", jantina: "P", rumah: "B"},
+            {kelas: "4A", nama: "LOVIA IVY SEBI ANAK LAYANG", jantina: "P", rumah: "H"},
+            {kelas: "4A", nama: "MARIFEL LEANNE ANAK ESUP", jantina: "P", rumah: "H"},
+            {kelas: "4A", nama: "MORISSON MELING ANAK BABIT", jantina: "L", rumah: "K"},
+            {kelas: "4A", nama: "RAFLICK PAWI ANAK MARLYN MEK", jantina: "L", rumah: "K"},
+            {kelas: "4A", nama: "REYLEOSEN RIO MUSA", jantina: "L", rumah: "B"},
+            {kelas: "4A", nama: "SALLYVIONNA EUNICE SIMAN ANAK MCALLIANCE INGGETTE", jantina: "P", rumah: "M"},
+            {kelas: "4A", nama: "STANLEY GALANG KAMIS ANAK LENDAI", jantina: "L", rumah: "H"},
+            {kelas: "4A", nama: "VALENTINA SYLVIA ANAK ROSE", jantina: "P", rumah: "M"},
+            {kelas: "5A", nama: "ALEXSION VINCENT ANAK ACHUN", jantina: "L", rumah: "K"},
+            {kelas: "5A", nama: "ALLYSHA ANAK BANA", jantina: "P", rumah: "B"},
+            {kelas: "5A", nama: "BRANDON BAWED ANAK ALEN DINGGAT", jantina: "L", rumah: "H"},
+            {kelas: "5A", nama: "CALVINE ANAK CHRISTOPHER", jantina: "L", rumah: "B"},
+            {kelas: "5A", nama: "DANIEL BASIK ANAK LEUOH", jantina: "L", rumah: "K"},
+            {kelas: "5A", nama: "ERWIN FRANKENSTEIN BAKIR ANAK ENTALANG", jantina: "L", rumah: "H"},
+            {kelas: "5A", nama: "FERDINAND SERING ANAK MICDILTON LAWAI", jantina: "L", rumah: "M"},
+            {kelas: "5A", nama: "FREDDRICKSON SERING ANAK JICKSON DANA", jantina: "L", rumah: "K"},
+            {kelas: "5A", nama: "HENDRY BASIK ANAK MAXWELL", jantina: "L", rumah: "M"},
+            {kelas: "5A", nama: "INDRATHEUS SALLEH ANAK MARK", jantina: "L", rumah: "H"},
+            {kelas: "5A", nama: "MARVENTA MURING ANAK MATHEW MELANA", jantina: "L", rumah: "M"},
+            {kelas: "5A", nama: "NICKLOS LAM ANAK KUJIE", jantina: "L", rumah: "B"},
+            {kelas: "6A", nama: "AIRINE ALIZZA NUIE ANAK BANSA", jantina: "P", rumah: "K"},
+            {kelas: "6A", nama: "ALEXANDER LASA ANAK HENRY", jantina: "L", rumah: "B"},
+            {kelas: "6A", nama: "ASIRA TERRY ANAK ANSI", jantina: "P", rumah: "M"},
+            {kelas: "6A", nama: "CAMELIA SAYU ANAK BUNYAU", jantina: "P", rumah: "H"},
+            {kelas: "6A", nama: "CATALYAUTIE PRINCESS ERRYSSYA ANAK CLARANCE", jantina: "P", rumah: "H"},
+            {kelas: "6A", nama: "CECELIA JAMERY ATUT ANAK TEMARA", jantina: "P", rumah: "K"},
+            {kelas: "6A", nama: "ELVIRA EVA ANAK HARRISON", jantina: "P", rumah: "H"},
+            {kelas: "6A", nama: "FLORENTINA ANAK TONY", jantina: "P", rumah: "B"},
+            {kelas: "6A", nama: "IZABELLA MARSHCELLA ANAK PATIH", jantina: "P", rumah: "B"},
+            {kelas: "6A", nama: "NUR MYA ARLISSYA SEGAYA BINTI ABDULLAH", jantina: "P", rumah: "K"}
+        ];
+
+        // Kategorikan murid
+        const categories = {
+            'tahap1-l': studentsData.filter(s => ['1A','2A','3A'].includes(s.kelas) && s.jantina === 'L'),
+            'tahap1-p': studentsData.filter(s => ['1A','2A','3A'].includes(s.kelas) && s.jantina === 'P'),
+            'tahap2-l': studentsData.filter(s => ['4A','5A','6A'].includes(s.kelas) && s.jantina === 'L'),
+            'tahap2-p': studentsData.filter(s => ['4A','5A','6A'].includes(s.kelas) && s.jantina === 'P')
+        };
+
+        // Simpan kedudukan
+        let results = {
+            'tahap1-l': {},
+            'tahap1-p': {},
+            'tahap2-l': {},
+            'tahap2-p': {}
+        };
+
+        // Fungsi papar status
+        function showStatus(msg, type, elementId = 'statusMsg') {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.innerHTML = `<div class="status-msg status-${type}">${msg}</div>`;
+                setTimeout(() => { el.innerHTML = ''; }, 5000);
+            }
+        }
+
+        // Fungsi tukar tab
+        function showTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            
+            tabs[index].classList.add('active');
+            contents[index].classList.add('active');
+        }
+
+        // Fungsi kira mata berdasarkan kedudukan
+        function calculatePoints(position) {
+            if (!position || position === 0) return 0;
+            if (position === 1) return 11;
+            if (position >= 2 && position <= 10) return 12 - position;
+            return 1;
+        }
+
+        // Fungsi papar jadual kategori
+        function renderCategoryTable(categoryId) {
+            const table = document.getElementById(`table-${categoryId}`);
+            const students = categories[categoryId];
+            
+            let html = `
+                <thead>
+                    <tr>
+                        <th>BIL</th>
+                        <th>NAMA</th>
+                        <th>RUMAH</th>
+                        <th>KEDUDUKAN</th>
+                        <th>MATA</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            students.forEach((student, index) => {
+                const position = results[categoryId][student.nama] || 0;
+                const points = calculatePoints(position);
+                const houseClass = `house-${student.rumah.toLowerCase() === 'm' ? 'merah' : 
+                                              student.rumah.toLowerCase() === 'b' ? 'biru' :
+                                              student.rumah.toLowerCase() === 'h' ? 'hijau' : 'kuning'}`;
+                
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${student.nama}</td>
+                        <td class="${houseClass}">${student.rumah === 'M' ? 'MERAH' : 
+                                                     student.rumah === 'B' ? 'BIRU' :
+                                                     student.rumah === 'H' ? 'HIJAU' : 'KUNING'}</td>
+                        <td>
+                            <input type="number" 
+                                   value="${position}" 
+                                   min="0" 
+                                   onchange="updatePosition('${categoryId}', '${student.nama}', this.value)">
+                        </td>
+                        <td><strong>${points}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody>';
+            table.innerHTML = html;
+            
+            renderAnalysis(categoryId);
+        }
+
+        // Fungsi update kedudukan
+        function updatePosition(categoryId, nama, position) {
+            results[categoryId][nama] = parseInt(position) || 0;
+            renderCategoryTable(categoryId);
+            renderOverallScores();
+            renderTop10Tables();
+        }
+
+        // Fungsi render analisa markah
+        function renderAnalysis(categoryId) {
+            const table = document.getElementById(`analysis-${categoryId}`);
+            const students = categories[categoryId];
+            
+            const scores = {M: 0, B: 0, H: 0, K: 0};
+            
+            students.forEach(student => {
+                const position = results[categoryId][student.nama] || 0;
+                const points = calculatePoints(position);
+                scores[student.rumah] += points;
+            });
+            
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>RUMAH</th>
+                        <th>MATA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="house-merah">MERAH</td><td>${scores.M}</td></tr>
+                    <tr><td class="house-biru">BIRU</td><td>${scores.B}</td></tr>
+                    <tr><td class="house-hijau">HIJAU</td><td>${scores.H}</td></tr>
+                    <tr><td class="house-kuning">KUNING</td><td>${scores.K}</td></tr>
+                </tbody>
+            `;
+        }
+
+        // Fungsi render markah keseluruhan
+        function renderOverallScores() {
+            const totalScores = {M: 0, B: 0, H: 0, K: 0};
+            
+            Object.keys(categories).forEach(categoryId => {
+                const students = categories[categoryId];
+                students.forEach(student => {
+                    const position = results[categoryId][student.nama] || 0;
+                    const points = calculatePoints(position);
+                    totalScores[student.rumah] += points;
+                });
+            });
+            
+            document.getElementById('merah-total').textContent = totalScores.M;
+            document.getElementById('biru-total').textContent = totalScores.B;
+            document.getElementById('hijau-total').textContent = totalScores.H;
+            document.getElementById('kuning-total').textContent = totalScores.K;
+        }
+
+        // Fungsi render 10 terbaik
+        function renderTop10Tables() {
+            Object.keys(categories).forEach(categoryId => {
+                const table = document.getElementById(`top10-${categoryId}`);
+                const students = categories[categoryId];
+                
+                const sorted = students
+                    .map(s => ({
+                        ...s,
+                        position: results[categoryId][s.nama] || 0,
+                        points: calculatePoints(results[categoryId][s.nama] || 0)
+                    }))
+                    .filter(s => s.position > 0)
+                    .sort((a, b) => a.position - b.position)
+                    .slice(0, 10);
+                
+                let html = `
+                    <thead>
+                        <tr>
+                            <th>BIL</th>
+                            <th>NAMA</th>
+                            <th>RUMAH</th>
+                            <th>KEDUDUKAN</th>
+                            <th>MATA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                if (sorted.length === 0) {
+                    html += '<tr><td colspan="5" style="text-align:center; color:#999;">Tiada data kedudukan</td></tr>';
+                } else {
+                    sorted.forEach((student, index) => {
+                        const houseClass = `house-${student.rumah.toLowerCase() === 'm' ? 'merah' : 
+                                                      student.rumah.toLowerCase() === 'b' ? 'biru' :
+                                                      student.rumah.toLowerCase() === 'h' ? 'hijau' : 'kuning'}`;
+                        
+                        html += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${student.nama}</td>
+                                <td class="${houseClass}">${student.rumah === 'M' ? 'MERAH' : 
+                                                             student.rumah === 'B' ? 'BIRU' :
+                                                             student.rumah === 'H' ? 'HIJAU' : 'KUNING'}</td>
+                                <td>${student.position}</td>
+                                <td><strong>${student.points}</strong></td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                html += '</tbody>';
+                table.innerHTML = html;
+            });
+        }
+
+        // Fungsi simpan ke Google Sheets
+        async function saveCategory(categoryId) {
+            const statusId = `statusMsg-${categoryId}`;
+            showStatus('⏳ Sedang menyimpan data...', 'info', statusId);
+
+            const data = [];
+            const students = categories[categoryId];
+            
+            students.forEach(student => {
+                const position = results[categoryId][student.nama] || 0;
+                const points = calculatePoints(position);
+                data.push({
+                    category: categoryId,
+                    nama: student.nama,
+                    rumah: student.rumah,
+                    position: position,
+                    points: points
+                });
+            });
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'save',
+                        category: categoryId,
+                        data: data
+                    })
+                });
+
+                showStatus('✅ Data berjaya disimpan ke Google Sheets!', 'success', statusId);
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('❌ Ralat: ' + error.message, 'error', statusId);
+            }
+        }
+
+        // Fungsi refresh data dari Google Sheets
+        async function refreshData() {
+            showStatus('⏳ Sedang memuatkan data dari Google Sheets...', 'info');
+
+            try {
+                const response = await fetch(API_URL + '?action=load');
+                const data = await response.json();
+                
+                if (data && data.results) {
+                    results = data.results;
+                    
+                    Object.keys(categories).forEach(categoryId => {
+                        renderCategoryTable(categoryId);
+                    });
+                    renderOverallScores();
+                    renderTop10Tables();
+                    
+                    showStatus('✅ Data berjaya dimuat semula!', 'success');
+                } else {
+                    showStatus('ℹ️ Tiada data dalam Google Sheets. Sila masukkan kedudukan dan simpan.', 'info');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('❌ Ralat: ' + error.message + '. Pastikan Google Apps Script sudah dideploy dengan betul.', 'error');
+            }
+        }
+
+        // Initialize
+        Object.keys(categories).forEach(categoryId => {
+            renderCategoryTable(categoryId);
+        });
+        renderOverallScores();
+        renderTop10Tables();
+
+        // Auto load data on start
+        setTimeout(refreshData, 1000);
+    </script>
+</body>
+</html>
